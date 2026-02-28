@@ -1,145 +1,89 @@
-🔎 LangChain Search Chat App
+# 🔎 LangChain AI Search Chatbot
 
-A Streamlit-based AI chatbot that can search the web using LangChain Agents and external tools like Wikipedia, Arxiv, and DuckDuckGo.
+<div align="center">
 
-This app demonstrates how to integrate:
+### 🚀 Search-Augmented AI Assistant  
+Built with **LangChain + Streamlit + Groq (LLaMA 3.1)**
 
-🧠 LangChain Agents
+</div>
 
-🔍 Web Search Tools
+---
 
-⚙️ Tool Reasoning with Callbacks
+## ✨ Overview
 
-💬 Streamlit Chat Interface
+This project is a **Search-Enabled AI Chatbot** that integrates **LangChain Agents** with external knowledge tools like:
 
-🚀 Groq LLM (LLaMA 3.1)
+- 🌐 DuckDuckGo Web Search  
+- 📖 Wikipedia API  
+- 📚 Arxiv Research Papers  
 
-📌 Features
+The application uses **Groq LLaMA 3.1 (8B Instant)** as the LLM and displays real-time reasoning steps using `StreamlitCallbackHandler`.
 
-✅ Chat-based interface using Streamlit
+---
 
-✅ Live agent reasoning with StreamlitCallbackHandler
+## 🎯 Features
 
-✅ Uses multiple search tools:
+- 💬 Interactive Chat Interface (Streamlit)
+- 🧠 ZERO_SHOT_REACT LangChain Agent
+- 🔍 Real-time Web Search
+- 📖 Wikipedia Knowledge Retrieval
+- 📚 Arxiv Research Paper Search
+- ⚡ Streaming LLM Responses
+- 🔄 Live Agent Reasoning Display
+- 🗂️ Session-based Chat Memory
 
-Wikipedia
+---
 
-Arxiv Research Papers
+## 🏗️ Architecture
 
-DuckDuckGo Web Search
+User Query  
+   ↓  
+LangChain Agent  
+   ↓  
+Tool Selection  
+   ↓  
+(Wikipedia | Arxiv | DuckDuckGo)  
+   ↓  
+Groq LLM Response  
+   ↓  
+Streamlit Chat Output  
 
-✅ Groq LLM integration (LLaMA 3.1 8B Instant)
+---
 
-✅ Displays intermediate tool usage steps
+## 🛠️ Tech Stack
 
-✅ Maintains chat session history
+- Python  
+- Streamlit  
+- LangChain  
+- LangChain Community Tools  
+- Groq API  
+- DuckDuckGo Search  
+- Wikipedia API  
+- Arxiv API  
+- python-dotenv  
 
-🛠️ Technologies Used
+---
 
-Python
+## 📂 Project Structure
+👨‍💻 Author
 
-Streamlit
-
-LangChain
-
-Groq API
-
-DuckDuckGo Search
-
-Wikipedia API
-
-Arxiv API
-
-dotenv
-
-📂 Project Structure
-project-folder/
-│
-├── app.py
-├── .env
-├── requirements.txt
-└── README.md
-🔧 Installation
-1️⃣ Clone the Repository
-git clone https://github.com/your-username/langchain-search-chat.git
-cd langchain-search-chat
-2️⃣ Create Virtual Environment (Recommended)
-python -m venv venv
-source venv/bin/activate   # On Windows: venv\Scripts\activate
-3️⃣ Install Dependencies
-pip install -r requirements.txt
-
-Or manually:
-
-pip install streamlit langchain langchain-community langchain-groq python-dotenv duckduckgo-search wikipedia arxiv
-🔑 Setup Groq API Key
-
-Get your API key from Groq.
-
-Create a .env file in your root directory:
-
-GROQ_API_KEY=your_api_key_here
-
-OR enter the API key directly from the Streamlit sidebar input.
-
-▶️ Run the Application
-streamlit run app.py
-
-The app will open in your browser.
-
-🧠 How It Works
-
-User enters a query in the chat.
-
-LangChain Agent processes the query.
-
-Agent decides which tool to use:
-
-Wikipedia → General knowledge
-
-Arxiv → Research papers
-
-DuckDuckGo → Web search
-
-Intermediate reasoning steps are displayed.
-
-Final answer is returned in the chat.
-
-🔎 Tools Used
-📖 WikipediaQueryRun
-
-Fetches summarized information from Wikipedia.
-
-📚 ArxivQueryRun
-
-Searches and retrieves research papers from Arxiv.
-
-🌐 DuckDuckGoSearchRun
-
-Performs real-time web search.
-
-🖼️ UI Preview
-
-Chat-based conversation
-
-Sidebar for API key input
-
-Live reasoning display
-
-Clean Streamlit layout
-
-🚀 Future Improvements
-
-Add memory support
-
-Add conversation summarization
-
-Add multi-model selection
-
-Add PDF upload support
-
-Add vector database integration
+Navneet Kumar Jha
+AI/ML & Web Development Enthusiast
 
 📜 License
 
 This project is for educational and demonstration purposes.
+
+
+---
+
+This version is:
+
+- ✅ Clean  
+- ✅ Professional  
+- ✅ GitHub ready  
+- ✅ Proper spacing  
+- ✅ Proper code blocks  
+- ✅ Good section hierarchy  
+
+If you want, I can now make it **next-level premium GitHub style with badges + screenshots section + demo link section** 😎
