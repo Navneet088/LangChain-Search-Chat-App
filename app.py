@@ -2,6 +2,8 @@
 import streamlit as st 
 from langchain.callbacks import StreamlitCallbackHandler
 from langchain_community.tools  import ArxivQueryRun,WikipediaQueryRun,DuckDuckGoSearchRun
+from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
+from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper,ArxivAPIWrapper
 from langchain_groq import ChatGroq
 from langchain.agents import initialize_agent,AgentType
@@ -19,7 +21,8 @@ wiki=WikipediaQueryRun(api_wrapper=api_wrapper_wiki)
 api_wrapper_arxive = ArxivAPIWrapper(top_k_results=5,doc_content_chars_max=2000)
 arxive = ArxivQueryRun(api_wrapper=api_wrapper_arxive)
 
-search=DuckDuckGoSearchRun(name="Search")
+api_wrapper_ddg = DuckDuckGoSearchAPIWrapper(max_results=5)
+search = DuckDuckGoSearchRun(api_wrapper=api_wrapper_ddg)
 
 st.title("🔎 LangChain -Chat with Search")
 st.markdown("""
@@ -61,6 +64,7 @@ if prompt:=st.chat_input(placeholder="What is machin Learning ?"):
         respounce = search_agent.run(prompt, callbacks=[st_cb])
         st.session_state.messages.append({"role":"assistant","content":respounce})
         st.write(respounce)
+
 
 
 
