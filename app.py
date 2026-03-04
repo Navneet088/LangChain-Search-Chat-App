@@ -33,6 +33,7 @@ with **StreamlitCallbackHandler** to show:
 All displayed live inside a Streamlit interface.
 
 """)
+st.secrets=["GROQ_API_KEY"]
 
 
 ## input the groq api key
@@ -62,5 +63,6 @@ if prompt:=st.chat_input(placeholder="What is machin Learning ?"):
         respounce=search_agent.run(st.session_state.messages,callbacks=[st_cb])
         st.session_state.messages.append({"role":"assistant","content":respounce})
         st.write(respounce)
+
 
 
