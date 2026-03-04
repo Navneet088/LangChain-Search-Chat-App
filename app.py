@@ -5,6 +5,7 @@ from langchain_community.tools  import ArxivQueryRun,WikipediaQueryRun,DuckDuckG
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper,ArxivAPIWrapper
+from langchain.memory import ConversationBufferMemory
 from langchain_groq import ChatGroq
 from langchain.agents import initialize_agent,AgentType
 from dotenv import load_dotenv
@@ -23,6 +24,7 @@ arxive = ArxivQueryRun(api_wrapper=api_wrapper_arxive)
 
 api_wrapper_ddg = DuckDuckGoSearchAPIWrapper(max_results=5)
 search = DuckDuckGoSearchRun(api_wrapper=api_wrapper_ddg)
+memory = ConversationBufferMemory(memory_key="chat_history")
 
 st.title("🔎 LangChain -Chat with Search")
 st.markdown("""
@@ -51,19 +53,29 @@ if "messagess" not in st.session_state:
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg['content'])
 
-if prompt:=st.chat_input(placeholder="What is machin Learning ?"):
+if prompt := st.chat_input("Ask something"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt) 
+    
+    with st.chat_message("user"):
+        st.write(prompt)
+
+    with st.chat_message("assistant"):
+        st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
+        response = search_agent.run(prompt, callbacks=[st_cb])
+        st.write(response)
+
+    st.session_state.messages.append({"role": "assistant", "content": response}) 
 
     llm=ChatGroq(groq_api_key=api_key,model_name="llama-3.1-8b-instant",streaming=True)
     tools=[search,arxive,wiki]
-    search_agent=initialize_agent(tools,llm,agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,handling_parsing_errors=True)
+    search_agent=initialize_agent(tools,llm,agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,memory=memory,handling_parsing_errors=True)
 
     with st.chat_message("assistant"):
         st_cb=StreamlitCallbackHandler(st.container(),expand_new_thoughts=False)
         respounce = search_agent.run(prompt, callbacks=[st_cb])
         st.session_state.messages.append({"role":"assistant","content":respounce})
         st.write(respounce)
+
 
 
 
