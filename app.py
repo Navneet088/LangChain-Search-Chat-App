@@ -43,38 +43,57 @@ All displayed live inside a Streamlit interface.
 st.sidebar.title("Settings")
 api_key=st.sidebar.text_input("Enter Groq API Key:",type="password")
 
-if "messagess" not in st.session_state:
-    st.session_state["messages"]=[
+# Initialize session history
+if "messages" not in st.session_state:
+    st.session_state["messages"] = [
         {
-           "role": "assisstant","content":"Hi,I'am a ChatBort Who can Search the Web .Hoe Can  I Help you? "
-
+            "role": "assistant",
+            "content": "Hi, I'm a chatbot who can search the web. How can I help you?"
         }
     ]
+
+# Show previous messages
 for msg in st.session_state.messages:
-    st.chat_message(msg["role"]).write(msg['content'])
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
+
 
 if prompt := st.chat_input("Ask something"):
+
+    if not api_key:
+        st.warning("Please enter Groq API Key")
+        st.stop()
+
+    # Save user message
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
+
     with st.chat_message("user"):
         st.write(prompt)
+
+    # Create LLM
+    llm = ChatGroq(
+        groq_api_key=api_key,
+        model_name="llama-3.1-8b-instant",
+        streaming=True
+    )
+
+    tools = [search, arxive, wiki]
+
+    search_agent = initialize_agent(
+        tools,
+        llm,
+        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+        memory=memory,
+        handling_parsing_errors=True
+    )
 
     with st.chat_message("assistant"):
         st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
         response = search_agent.run(prompt, callbacks=[st_cb])
         st.write(response)
 
-    st.session_state.messages.append({"role": "assistant", "content": response}) 
-
-    llm=ChatGroq(groq_api_key=api_key,model_name="llama-3.1-8b-instant",streaming=True)
-    tools=[search,arxive,wiki]
-    search_agent=initialize_agent(tools,llm,agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,memory=memory,handling_parsing_errors=True)
-
-    with st.chat_message("assistant"):
-        st_cb=StreamlitCallbackHandler(st.container(),expand_new_thoughts=False)
-        respounce = search_agent.run(prompt, callbacks=[st_cb])
-        st.session_state.messages.append({"role":"assistant","content":respounce})
-        st.write(respounce)
+    # Save assistant response
+    st.session_state.messages.append({"role": "assistant", "content": response})
 
 
 
