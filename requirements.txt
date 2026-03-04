@@ -18,7 +18,7 @@ faiss-cpu
 chromadb
 langchain_chroma
 beautifulsoup4
-streamlit
+
 langchain_groq
 langserve
 fastapi
@@ -32,4 +32,9 @@ unstructured
 pytube
 numexpr
 langchain-experimental
+langchain==0.1.16
+langchain-community==0.0.38
+langchain-groq
+streamlit
+
 
