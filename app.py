@@ -1,6 +1,6 @@
 #All importent Librery
 import streamlit as st 
-from langchain.callbacks import StreamlitCallbackHandler
+from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
 from langchain_community.tools  import ArxivQueryRun,WikipediaQueryRun,DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper,ArxivAPIWrapper
 from langchain_groq import ChatGroq
@@ -63,6 +63,7 @@ if prompt:=st.chat_input(placeholder="What is machin Learning ?"):
         respounce=search_agent.run(st.session_state.messages,callbacks=[st_cb])
         st.session_state.messages.append({"role":"assistant","content":respounce})
         st.write(respounce)
+
 
 
 
