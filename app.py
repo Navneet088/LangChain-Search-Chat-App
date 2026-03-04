@@ -89,11 +89,12 @@ if prompt := st.chat_input("Ask something"):
 
     with st.chat_message("assistant"):
         st_cb = StreamlitCallbackHandler(st.container(), expand_new_thoughts=False)
-        response = search_agent.run(prompt, callbacks=[st_cb])
+        respounce=search_agent.run(st.session_state.messages,callbacks=[st_cb])
         st.write(response)
 
     # Save assistant response
     st.session_state.messages.append({"role": "assistant", "content": response})
+
 
 
 
