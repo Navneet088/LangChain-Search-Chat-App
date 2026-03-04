@@ -131,7 +131,7 @@ from langchain.agents import initialize_agent, AgentType
 
 st.set_page_config(page_title="LangChain Search Chat", page_icon="🔎", layout="centered")
 
-# ---------- Session State Defaults ----------
+# ---------- Session State ----------
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "Hi! I can search Wikipedia, Arxiv and the web. What would you like to know?"}]
@@ -144,37 +144,22 @@ if "tools_used" not in st.session_state:
 
 with st.sidebar:
     st.title("⚙️ Settings")
-
-    # API Key
     api_key = st.text_input("🔑 Groq API Key:", type="password")
-
     st.markdown("---")
-
-    # Model selector
     model = st.selectbox(
         "🤖 Select LLM Model",
         options=[
+            "llama-3.3-70b-versatile",   # ✅ best for following instructions
             "llama-3.1-8b-instant",
-            "llama-3.3-70b-versatile",
             "mixtral-8x7b-32768",
             "gemma2-9b-it",
         ],
-        help="Larger models give better answers but are slower."
+        help="llama-3.3-70b gives most accurate answers."
     )
-
     st.markdown("---")
-
-    # Tools info
     st.markdown("**🛠️ Tools Available**")
-    st.markdown("""
-    - 📖 **Wikipedia** — general knowledge  
-    - 📄 **Arxiv** — research papers  
-    - 🌐 **DuckDuckGo** — recent news  
-    """)
-
+    st.markdown("- 📖 **Wikipedia** — general knowledge\n- 📄 **Arxiv** — research papers\n- 🌐 **DuckDuckGo** — recent news")
     st.markdown("---")
-
-    # Clear chat
     if st.button("🗑️ Clear Chat History", use_container_width=True):
         st.session_state["messages"] = [{"role": "assistant", "content": "Chat cleared! How can I help you?"}]
         st.session_state["memory"] = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -185,24 +170,21 @@ with st.sidebar:
 
 st.title("🔎 LangChain - Chat with Search")
 
-# ---------- Tool Badge Helper ----------
+# ---------- Tool Badge ----------
 
 def tool_badge(name: str) -> str:
     mapping = {
-        "wikipedia":         ("📖 Wikipedia",   "background-color:#e8f4fd;color:#1a6fa0;"),
-        "arxiv":             ("📄 Arxiv",        "background-color:#edf7ed;color:#2e7d32;"),
-        "duckduckgo_search": ("🌐 DuckDuckGo",   "background-color:#fff3e0;color:#e65100;"),
+        "wikipedia":         ("📖 Wikipedia",  "background-color:#e8f4fd;color:#1a6fa0;"),
+        "arxiv":             ("📄 Arxiv",       "background-color:#edf7ed;color:#2e7d32;"),
+        "duckduckgo_search": ("🌐 DuckDuckGo",  "background-color:#fff3e0;color:#e65100;"),
     }
     label, style = mapping.get(name.lower(), (f"🔧 {name}", "background-color:#f3e5f5;color:#6a1b9a;"))
-    return (
-        f'<span style="display:inline-block;padding:2px 10px;border-radius:12px;'
-        f'font-size:12px;font-weight:600;margin:2px;{style}">{label}</span>'
-    )
+    return f'<span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;margin:2px;{style}">{label}</span>'
 
-# ---------- Tools Setup ----------
+# ---------- Tools ----------
 
 wiki = WikipediaQueryRun(
-    api_wrapper=WikipediaAPIWrapper(top_k_results=2, doc_content_chars_max=1500)
+    api_wrapper=WikipediaAPIWrapper(top_k_results=3, doc_content_chars_max=3000)  # more content = better answers
 )
 arxive = ArxivQueryRun(
     api_wrapper=ArxivAPIWrapper(top_k_results=2, doc_content_chars_max=1500)
@@ -216,18 +198,30 @@ def safe_ddg_search(query: str) -> str:
         time.sleep(3 - elapsed)
     try:
         result = DuckDuckGoSearchRun(
-            api_wrapper=DuckDuckGoSearchAPIWrapper(max_results=2)
+            api_wrapper=DuckDuckGoSearchAPIWrapper(max_results=3)
         ).run(query)
         _ddg_last_called["time"] = time.time()
         return result
     except Exception:
-        return "DuckDuckGo is rate-limited. Rely on Wikipedia or Arxiv for this query."
+        return "DuckDuckGo is rate-limited. Use Wikipedia result instead."
 
 search = Tool(
     name="duckduckgo_search",
     func=safe_ddg_search,
-    description="Use ONLY for very recent news not found in Wikipedia or Arxiv."
+    description="Use for very recent news or current status of people/events not in Wikipedia."
 )
+
+# ---------- Stronger System Prompt ----------
+
+SYSTEM_PROMPT = """You are a helpful, intelligent assistant that can answer ANY question — general knowledge, science, people, current events, coding, math, history, recipes, and more.
+
+You have access to 3 tools: Wikipedia, Arxiv, and DuckDuckGo.
+
+- If you already know the answer confidently, give Final Answer directly WITHOUT using any tool.
+- If you need to look something up, use the most relevant tool ONCE, then give Final Answer.
+- NEVER call the same tool twice with a similar query.
+- Always give a clear, detailed, and helpful Final Answer.
+"""
 
 # ---------- Chat History ----------
 
@@ -238,7 +232,7 @@ for msg in st.session_state.messages:
         if msg["role"] == "assistant" and tool_idx < len(st.session_state.tools_used):
             tools = st.session_state.tools_used[tool_idx]
             if tools:
-                badges = "".join(tool_badge(t) for t in tools)
+                badges = "".join(tool_badge(t) for t in set(tools))  # set() removes duplicates
                 st.markdown(f"<small>🛠️ Tools used: {badges}</small>", unsafe_allow_html=True)
             tool_idx += 1
 
@@ -272,17 +266,9 @@ if prompt := st.chat_input("Ask me anything..."):
         agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         memory=st.session_state["memory"],
         handle_parsing_errors=True,
-        max_iterations=3,
+        max_iterations=2,               # ✅ max 2 tool calls — forces quick answer
         early_stopping_method="generate",
-        agent_kwargs={
-            "prefix": (
-                "You are a helpful assistant. "
-                "Use Wikipedia first, then Arxiv for research topics, "
-                "and DuckDuckGo only for very recent news. "
-                "Never call the same tool twice. "
-                "Once you have enough info, give your Final Answer immediately."
-            )
-        }
+        agent_kwargs={"prefix": SYSTEM_PROMPT}
     )
 
     with st.chat_message("assistant"):
@@ -296,17 +282,8 @@ if prompt := st.chat_input("Ask me anything..."):
         st.write(response)
 
         if tools_this_turn:
-            badges = "".join(tool_badge(t) for t in tools_this_turn)
+            badges = "".join(tool_badge(t) for t in set(tools_this_turn))
             st.markdown(f"<small>🛠️ Tools used: {badges}</small>", unsafe_allow_html=True)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
     st.session_state.tools_used.append(tools_this_turn)
-
-
-
-
-
-
-
-
-
