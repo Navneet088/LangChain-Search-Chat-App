@@ -7,7 +7,8 @@ langchain-groq==0.1.4
 
 arxiv
 wikipedia
-duckduckgo-search==5.3.1
+duckduckgo_search==5.3.0
 validators==0.28.1
+
 
 
