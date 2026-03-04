@@ -1,6 +1,6 @@
 #All importent Librery
 import streamlit as st 
-from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
+from langchain.callbacks import StreamlitCallbackHandler
 from langchain_community.tools  import ArxivQueryRun,WikipediaQueryRun,DuckDuckGoSearchRun
 from langchain_community.utilities import WikipediaAPIWrapper,ArxivAPIWrapper
 from langchain_groq import ChatGroq
@@ -34,8 +34,6 @@ All displayed live inside a Streamlit interface.
 
 """)
 
-
-
 ## input the groq api key
 st.sidebar.title("Settings")
 api_key=st.sidebar.text_input("Enter Groq API Key:",type="password")
@@ -60,7 +58,7 @@ if prompt:=st.chat_input(placeholder="What is machin Learning ?"):
 
     with st.chat_message("assistant"):
         st_cb=StreamlitCallbackHandler(st.container(),expand_new_thoughts=False)
-        respounce=search_agent.run(st.session_state.messages,callbacks=[st_cb])
+        respounce = search_agent.run(prompt, callbacks=[st_cb])
         st.session_state.messages.append({"role":"assistant","content":respounce})
         st.write(respounce)
 
